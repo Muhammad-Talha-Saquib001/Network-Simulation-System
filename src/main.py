@@ -1,37 +1,44 @@
 # src/main.py
-
 from core.router import Router
-from core.packet import Packet
+from protocols.smtp import SMTPProtocol
 
 
-def demo_simulation():
+def build_simple_topology():
     # Create routers
-    r1 = Router("A")
-    r2 = Router("B")
-    r3 = Router("C")
+    rA = Router("A")
+    rB = Router("B")
+    rC = Router("C")
 
-    # Connect routers
-    r1.add_connection(r2, delay=0.2)
-    r2.add_connection(r3, delay=0.2)
+    # Connect routers (bidirectional via Router.add_connection)
+    rA.add_connection(rB, delay=0.1)
+    rB.add_connection(rC, delay=0.1)
 
-    # Routing tables
-    r1.add_route("C", "B")
-    r2.add_route("C", "C")
-    r2.add_route("A", "A")
-    r3.add_route("A", "B")
+    # Populate routing tables (manual static routes for demo)
+    # A -> C via B
+    rA.add_route("C", "B")
+    # B -> C direct
+    rB.add_route("C", "C")
+    # B -> A direct
+    rB.add_route("A", "A")
+    # C -> A via B
+    rC.add_route("A", "B")
 
-    # Create packet
-    packet = Packet(source="A", destination="C", payload="Hello Cloud!")
+    return rA, rB, rC
 
-    # Forward packet
-    current = r1
-    while current:
-        print(f"Router {current.router_id} forwarding packet {packet.id}")
-        current = current.forward_packet(packet)
 
-    print("Packet delivered successfully.")
-    print("Path:", " -> ".join(packet.path))
+def demo_smtp():
+    rA, rB, rC = build_simple_topology()
+
+    # Attach SMTP protocol instances to routers (A and C)
+    smtp_A = SMTPProtocol(node=rA)
+    smtp_C = SMTPProtocol(node=rC)
+
+    # NOTE: router.forward_packet appends hops to Packet.path.
+    # We want C to be able to "receive" and process the payload after arrival.
+    # To keep things modular, SMTPProtocol.send uses Router.forward_packet to deliver to the destination.
+    # After send completes, Packet.path will show the route, and the destination router can inspect payload.
+    smtp_A.send("Hello C, this is A via SMTP", destination="C")
 
 
 if __name__ == "__main__":
-    demo_simulation()
+    demo_smtp()
