@@ -59,3 +59,19 @@ class Router:
 
         next_router = connection.transmit(packet, self.router_id)
         return next_router
+
+    # ---- Phase 3: Routing Table Integration ----
+
+    def set_routing_table(self, table):
+        self.routing_table = table
+
+    def forward(self, packet):
+        dest = packet.destination
+
+        if dest in self.routing_table:
+            next_hop = self.routing_table[dest]["next_hop"]
+            print(f"[Router {self.name}] Forwarding packet to next hop {next_hop}")
+            return next_hop
+        else:
+            print(f"[Router {self.name}] No route to destination {dest}")
+            return None
