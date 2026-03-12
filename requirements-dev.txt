@@ -1,0 +1,16 @@
+# ============================================================================
+# Network Simulation System - Dependencies
+# ============================================================================
+
+# --- Core Requirements ---
+# The core simulation is entirely dependency-free and runs on the 
+# Python Standard Library out-of-the-box (uses built-in `time`, `uuid`, etc.).
+
+# --- Development & Testing (Optional) ---
+# The following packages are recommended if you plan to extend the project,
+# run the test suite, or contribute to future improvements.
+
+pytest>=7.0.0        # Framework for running the unit tests in the /tests folder
+pytest-cov>=4.0.0    # Test coverage measuring
+black>=23.0.0        # Code formatting to maintain a professional codebase
+flake8>=6.0.0        # Linting to catch potential errors
